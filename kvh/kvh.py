@@ -1,6 +1,7 @@
 import sys
 import codecs
 from re import match
+from kvh.ckvh import kvh_read
 
 #import pdb
 __version__="0.1"

@@ -1,5 +1,8 @@
 // compile with
 // f=ckvh; c++ -O3 -Wall -shared -std=c++11 -fPIC $(python3.8 -m pybind11 --includes) $f.cpp -o $f$(python3.8-config --extension-suffix)
+#define STRINGIFY(x) #x
+#define MACRO_STRINGIFY(x) STRINGIFY(x)
+
 #include <Python.h>
 #include <pybind11/pybind11.h>
 namespace py = pybind11;
@@ -14,7 +17,7 @@ namespace py = pybind11;
 #include <cerrno>
 #include <algorithm>
 
-#include "kvh.h"
+#include "ckvh.h"
 
 static std::string whitespaces(" \t\f\v\n\r");
 //py::object op = py::module_::import("os.path");
@@ -51,7 +54,11 @@ std::vector<std::string> split(const std::string &s, const std::string &sep) {
 }
 std::string dir_n(std::string p) {
     // extract dirname part of path p
-    return p.substr(0, p.find_last_of("/"));
+    auto i=p.find_last_of("/");
+    if (i == std::string::npos)
+        return std::string(".");
+    else
+        return p.substr(0, i);
     //return py::str(dn(p.c_str()));
 }
 std::string base_n(std::string p) {
@@ -243,8 +250,19 @@ list_line kvh_read(std::ifstream& fin, size_t lev, size_t* ln, const std::string
     //py::list nm(0);
     while (!fin.eof()) { // && i++ < 5) {
         // get full line (i.e. concat lines with escaped end_of_line)
-        if (read_stream)
+        if (read_stream) {
+            /*
+            #ifdef _WIN32
+            #include <Windows.h>
+            #else
+            #include <unistd.h>
+            #endif
+            sleep(1);
+            */
             line=kvh_get_line(fin, ln, comment_str);
+            if (ln[0] % 100 == 0 && PyErr_CheckSignals() != 0)
+                throw std::runtime_error(std::string("interrupted by Ctrl-C"));
+        }
         if (skip_blank && (line.size() == 0 || (strip_white && line.find_first_not_of(whitespaces) == std::string::npos)) && !fin.eof()) {
             continue; // skip white line
         }
@@ -289,22 +307,6 @@ list_line kvh_read(std::ifstream& fin, size_t lev, size_t* ln, const std::string
     ll.line="";
     return ll;
 }
-//' Parse file in KVH format
-//'
-//' Returns a list with names formed form kvh keys and values formed from kvh values
-//' If a kvh value has sub-keys, it is returned as a nested list. Otherwise it is
-//' returned as a character string.
-//'
-//' @param fn character kvh file name.
-//' @param comment_str character optional comment string (default empty ""). If non empty, the comment
-//'   string itself and everything following it on the line is ignored. Note that
-//'   lines are first appended if end lines are escaped and then a search for a
-//'   comment string is done.
-//' @param strip_white logical optional control of white spaces on both ends of keys and values (default FALSE)
-//' @param skip_blank logical optional control of lines composed of only white characters after a possible stripping of a comment (default FALSE)
-//' @param split_str character optional string by which a value string can be splitted in several strings (default: empty string, i.e. no splitting)
-//' @param follow_url logical optional control of recursive kvh reading and parsing. If set to TRUE and a value starts with 'file://' then the path following this prefix will be passed as argument 'fn' to another 'kvh_read()' call. The list returned by this last call will be affected to the corresponding key instead of the value 'file://...'. If a circular reference to some file is detected, a warning is emmited and the faulty value 'file://...' will be left without change. The rest of the file is proceeded as usual. If a path is relative one (i.e. not strating with `/` neither 'C:/' or alike on windows paltform) then its meant relative to the location of the parent kvh file, not the current working directory.
-//' @export
 py::object kvh_read(std::string fn, const std::string& comment_str="", const bool strip_white=false, const bool skip_blank=false, const std::string& split_str="", const bool follow_url=false) {
     if (fn.size() == 0)
         throw std::runtime_error("kvh_read: file name is empty");
@@ -323,9 +325,7 @@ py::object kvh_read(std::string fn, const std::string& comment_str="", const boo
         fn=dirw[dirw.size()-1]+"/"+base_n(fn);
         npath=norm_p(fn);
         if (read_files.count(npath)) {
-            char buf[1024];
-            std::snprintf(buf, 1024, "kvh_read: detected circular reference to file '%s' via '%s'", npath.c_str(), fn.c_str());
-            std::cerr << buf << std::endl;
+            std::cerr << "kvh_read: detected circular reference to file '" << npath << "' via '" << fn << "'" << std::endl;
             return py::none();
         }
         read_files.insert(npath);
@@ -339,10 +339,8 @@ py::object kvh_read(std::string fn, const std::string& comment_str="", const boo
         if (follow_url) {
             read_files.erase(npath);
             dirw.pop_back();
-            char buf[1024];
-            std::snprintf(buf, 1024, "kvh_read: cannot open file '%s', reason: %s", fn.c_str(), std::strerror(errno));
-            throw std::runtime_error(buf);
         }
+        throw std::runtime_error(std::string("kvh_read: cannot read in file '")+fn.c_str()+"'; the reason: "+std::strerror(errno));
     }
     ll=kvh_read(fin, 0, &ln, comment_str, strip_white, skip_blank, split_str, follow_url);
     fin.close();
@@ -355,7 +353,22 @@ py::object kvh_read(std::string fn, const std::string& comment_str="", const boo
 }
 PYBIND11_MODULE(ckvh, m) {
     using namespace pybind11::literals;
-    m.doc() = "kvh file read written in C++"; // optional module docstring
-    //py::object (*ks)(std::string fn, const std::string&, const bool, const bool, const std::string&, const bool) = &kvh_read;
-    m.def("kvh_read",  (py::object (*)(std::string fn, const std::string&, const bool, const bool, const std::string&, const bool)) &kvh_read, "fn"_a, "comment_str"_a="", "strip_white"_a=false, "skip_blank"_a=false, "split_str"_a="", "follow_url"_a=false);
+    m.doc() = "read a file in KVH format (developed in C++)"; // module docstring
+    m.def("kvh_read",  (py::object (*)(std::string, const std::string&, const bool, const bool, const std::string&, const bool)) &kvh_read, "fn"_a, "comment_str"_a="", "strip_white"_a=false, "skip_blank"_a=false, "split_str"_a="", "follow_url"_a=false, R"mydelimiter(
+    Parse file in KVH format
+    
+    :param fn: character kvh file name.
+    :param comment_str: character optional comment string (default empty ""). If non empty, the comment string itself and everything following it on the line is ignored. Note that lines are first appended if end lines are escaped and then a search for a comment string is done.
+    :param strip_white: logical optional control of white spaces on both ends of keys and values (default False)
+    :param skip_blank: logical optional control of lines composed of only white characters after a possible stripping of a comment (default False)
+    :param split_str: character optional string by which a value string can be splitted in several strings (default: empty string, i.e. no splitting)
+    :param follow_url: logical optional control of recursive kvh reading and parsing. If set to True and a value starts with 'file://' then the path following this prefix will be passed as argument 'fn' to another 'kvh_read()' call. The list returned by this last call will be affected to the corresponding key instead of the value 'file://...'. If a circular reference to some file is detected, a warning is emmited and the faulty value 'file://...' will be left without change. The rest of the file is proceeded as usual. If a path is relative one (i.e. not strating with `/` neither 'C:/' or alike on windows paltform) then its meant relative to the location of the parent kvh file, not the current working directory.
+    :return: list of tuples (key, value) where 'key' is always a string, and 'value' can be a string, a list of tuples or a tuple (if 'split_str' is not empty and there are more then one item).
+
+)mydelimiter");
+#ifdef VERSION_INFO
+    m.attr("__version__") = MACRO_STRINGIFY(VERSION_INFO);
+#else
+    m.attr("__version__") = "dev";
+#endif
 }
