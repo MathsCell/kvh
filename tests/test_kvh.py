@@ -3,9 +3,12 @@ import pytest
 import kvh.kvh as kv
 
 def test_0():
-    assert kv.__version__ == '0.1'
-    assert kv.kvh_read(str(Path(__file__).parent/"test0.kvh")) == [("key", "value")]
+    fn=str(Path(__file__).parent/"test0.kvh")
+    assert kv.kvh_read(fn) == [("key", "value")]
+    assert kv.kvh_read(open(fn, "rb")) == [("key", "value")]
 
 def test_err():
     with pytest.raises(RuntimeError):
         kv.kvh_read("non existing file")
+    with pytest.raises(TypeError):
+        kv.kvh_read(["no way to read a list"])

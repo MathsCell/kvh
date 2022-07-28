@@ -4,7 +4,6 @@ from re import match
 from kvh.ckvh import kvh_read
 
 #import pdb
-__version__="0.1"
 def isstr(s):
     return isinstance(s, str)
 class Obj():
@@ -12,6 +11,8 @@ class Obj():
         self.__dict__.update(kwrags)
 def kvh2tlist(fp, lev=[0], indent=[0], strip=False):
     """
+    Deprecated. Use kvh_read() instead.
+    
     Read a kvh file from fp stream descriptor
     and organize its content in list of tuples [(k1,v1), (k2,[(k2.1, v2.1)])]
     If fp is a string, it is used in open() operator
@@ -149,14 +150,14 @@ def kvh2dict(fp, strip=False):
     structure to a returned hierarchical dictionnary.
     Repeated keys at the same level of a dictionnary are
     silently overwritten"""
-    return kvh_tlist2dict(kvh2tlist(fp, strip=strip));
+    return kvh_tlist2dict(kvh_read(fp, strip_white=strip))
 def kvh2obj(fp, strip=False):
     r"""
     Read a kvh file from fp pointer then translate its tlist
     structure to a returned object hierarchy.
     Repeated fields at the same level of an object are
     silently overwritten"""
-    return kvh_tlist2obj(kvh2tlist(fp, strip=strip));
+    return kvh_tlist2obj(kvh_read(fp, strip_white=strip));
 def dict2kvh(d, fp=sys.stdout, indent=0):
     r"""dict2kvh(d, fp=sys.stdout, indent=0)
     Write a nested dictionary on the stream fp (stdout by default).

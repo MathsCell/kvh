@@ -3,11 +3,11 @@
 KVH format is a lightweight key-value hierarchy format for storing nested structures.
 It uses only 3 control characters:
 
- - <tab> for separating key from value and indenting nested keys;
- - <newline> for separating key-value records from each other;
- - <backslash> for escaping previous 2 characters and itself.
+ - \<tab\> for separating key from value and indenting nested keys;
+ - \<newline\> for separating key-value records from each other;
+ - \<backslash\> for escaping previous 2 characters and itself.
  
- For example, the following file introduces salutation in English and French:
+ For example, the following file introduces salutations in English and French:
  
  ```
  salutation
@@ -15,18 +15,18 @@ It uses only 3 control characters:
 	fr	Salut, le Monde !
  ```
  
-The world `salutation` is a key without value. The indented keys `en` and `fr` are sub-keys of `salutation`. As `salutation` has sub-keys, it cannot have its own value. That's why it is immediately followed by a <newline> and not <tab>. The text `Hello World!` is a value of `en`. Note the absence of quotes, double quotes and alike.
+The world `salutation` is a key without value. The indented keys `en` and `fr` are sub-keys of `salutation`. As `salutation` has sub-keys, it cannot have its own value. That's why it is immediately followed by a \<newline\> and not \<tab\>. The text `Hello World!` is a value of `en`. Note the absence of quotes, double quotes and alike.
 
 Let suppose that this content is saved in a file `salut.kvh`
 Then we can read it in Python3
 
 ```python
-import kvh
+import kvh.kvh as kv
 
-res=kvh.kvh2tlist("salut.kvh")
+res=kv.kvh_read("salut.kvh")
 print(res)
 
-# a dict() can be a more tractable structure to hold the content
+# sometimes, a dict() can be a more tractable structure to hold the content
 d=kvh.kvh2dict("salut.kvh")
 print(d)
 ```

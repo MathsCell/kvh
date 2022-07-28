@@ -152,7 +152,7 @@ inline void strip_wh(std::string &s) {
         s.erase(pstr+1);
     return;
 }
-std::string kvh_get_line(std::ifstream& fin, size_t* ln, const std::string& comment_str) {
+std::string kvh_get_line(std::istream& fin, size_t* ln, const std::string& comment_str) {
     // get a string from stream that ends without escaped eol character and increment ln[0]
     std::string b, res;
     size_t pstr;
@@ -239,7 +239,7 @@ keyval kvh_parse_kv(std::string& line, size_t& lev, const bool strip_white, cons
     }
     return(kv);
 }
-list_line kvh_read(std::ifstream& fin, size_t lev, size_t* ln, const std::string& comment_str, const bool strip_white, const bool skip_blank, const std::string& split_str, const bool follow_url) {
+list_line kvh_read(std::istream& fin, size_t lev, size_t* ln, const std::string& comment_str, const bool strip_white, const bool skip_blank, const std::string& split_str, const bool follow_url) {
     // recursively read kvh file and return its content in a nested named list of character vectors
     py::list res;
     keyval kv;
@@ -342,7 +342,7 @@ py::object kvh_read(std::string fn, const std::string& comment_str="", const boo
         }
         throw std::runtime_error(std::string("kvh_read: cannot read in file '")+fn.c_str()+"'; the reason: "+std::strerror(errno));
     }
-    ll=kvh_read(fin, 0, &ln, comment_str, strip_white, skip_blank, split_str, follow_url);
+    ll=kvh_read(static_cast<std::istream&>(fin), 0, &ln, comment_str, strip_white, skip_blank, split_str, follow_url);
     fin.close();
     if (follow_url) {
         read_files.erase(npath);
@@ -357,15 +357,22 @@ PYBIND11_MODULE(ckvh, m) {
     m.def("kvh_read",  (py::object (*)(std::string, const std::string&, const bool, const bool, const std::string&, const bool)) &kvh_read, "fn"_a, "comment_str"_a="", "strip_white"_a=false, "skip_blank"_a=false, "split_str"_a="", "follow_url"_a=false, R"mydelimiter(
     Parse file in KVH format
     
-    :param fn: character kvh file name.
-    :param comment_str: character optional comment string (default empty ""). If non empty, the comment string itself and everything following it on the line is ignored. Note that lines are first appended if end lines are escaped and then a search for a comment string is done.
-    :param strip_white: logical optional control of white spaces on both ends of keys and values (default False)
-    :param skip_blank: logical optional control of lines composed of only white characters after a possible stripping of a comment (default False)
-    :param split_str: character optional string by which a value string can be splitted in several strings (default: empty string, i.e. no splitting)
-    :param follow_url: logical optional control of recursive kvh reading and parsing. If set to True and a value starts with 'file://' then the path following this prefix will be passed as argument 'fn' to another 'kvh_read()' call. The list returned by this last call will be affected to the corresponding key instead of the value 'file://...'. If a circular reference to some file is detected, a warning is emmited and the faulty value 'file://...' will be left without change. The rest of the file is proceeded as usual. If a path is relative one (i.e. not strating with `/` neither 'C:/' or alike on windows paltform) then its meant relative to the location of the parent kvh file, not the current working directory.
+    :param fn: character or FILE*, kvh file name or an input stream
+    :param comment_str: character, optional comment string (default empty ""). If non empty, the comment string itself and everything following it on the line is ignored. Note that lines are first appended if end lines are escaped and then a search for a comment string is done.
+    :param strip_white: logical, optional control of white spaces on both ends of keys and values (default False)
+    :param skip_blank: logical, optional control of lines composed of only white characters after a possible stripping of a comment (default False)
+    :param split_str: character, optional string by which a value string can be splitted in several strings (default: empty string, i.e. no splitting)
+    :param follow_url: logical, optional control of recursive kvh reading and parsing. If set to True and a value starts with 'file://' then the path following this prefix will be passed as argument 'fn' to another 'kvh_read()' call. The list returned by this last call will be affected to the corresponding key instead of the value 'file://...'. If a circular reference to some file is detected, a warning is emmited and the faulty value 'file://...' will be left without change. The rest of the file is proceeded as usual. If a path is relative one (i.e. not strating with `/` neither 'C:/' or alike on windows paltform) then its meant relative to the location of the parent kvh file, not the current working directory.
     :return: list of tuples (key, value) where 'key' is always a string, and 'value' can be a string, a list of tuples or a tuple (if 'split_str' is not empty and there are more then one item).
 
 )mydelimiter");
+    m.def("kvh_read", [](py::object fp, const std::string& comment_str, const bool strip_white, const bool skip_blank, const std::string& split_str, const bool follow_url) {
+        if (!(py::hasattr(fp,"read") && py::hasattr(fp,"flush")))
+            throw py::type_error("kvh_read: incompatible function argument: 'fp' must be a string or file-like object, but `"+(std::string)(py::repr(fp))+"` provided");
+        std::istringstream sin(fp.attr("read")().cast<std::string>());
+        size_t ln=0;
+        return kvh_read(static_cast<std::istream&>(sin), 0, &ln, comment_str, strip_white, skip_blank, split_str, follow_url).res;
+    }, "fp"_a, "comment_str"_a="", "strip_white"_a=false, "skip_blank"_a=false, "split_str"_a="", "follow_url"_a=false);
 #ifdef VERSION_INFO
     m.attr("__version__") = MACRO_STRINGIFY(VERSION_INFO);
 #else
