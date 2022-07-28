@@ -1,6 +1,6 @@
 package:
-  name: python_example
-  version: 0.0.1
+  name: kvh
+  version: 0.2
 
 source:
   path: ..
@@ -20,16 +20,16 @@ requirements:
 
   run:
     - python
-
+    - pytest
 
 test:
   imports:
-    - python_example
+    - kvh
   source_files:
     - tests
   commands:
-    - python tests/test.py
+    - python -m pytest tests
 
 about:
-  summary: An example project built with pybind11.
+  summary: read/write files in KVH format
   license_file: LICENSE
