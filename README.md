@@ -23,10 +23,14 @@ Then we can read it in Python3
 ```python
 import kvh.kvh as kv
 
+# prepare salut.kvh
+with open("salut.kvh", "w") as fp:
+	print("salutation\n\ten\tHello World!\n\tfr\tSalut, le Monde !", file=fp)
+
 res=kv.kvh_read("salut.kvh")
 print(res)
 
 # sometimes, a dict() can be a more tractable structure to hold the content
-d=kvh.kvh2dict("salut.kvh")
+d=kv.kvh2dict("salut.kvh")
 print(d)
 ```
