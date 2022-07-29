@@ -1,1 +1,1 @@
-__all__ = ["kvh.py"]
+__all__ = ["kvh.py", "version.py"]

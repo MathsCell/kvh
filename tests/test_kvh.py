@@ -4,8 +4,9 @@ import kvh.kvh as kv
 
 def test_0():
     fn=str(Path(__file__).parent/"test0.kvh")
-    assert kv.kvh_read(fn) == [("key", "value")]
-    assert kv.kvh_read(open(fn, "rb")) == [("key", "value")]
+    # we use strip_white for Windows where "\r" is kept otherwise.
+    assert kv.kvh_read(fn, strip_white=True) == [("key", "value")]
+    assert kv.kvh_read(open(fn, "rb"), strip_white=True) == [("key", "value")]
 
 def test_err():
     with pytest.raises(RuntimeError):
