@@ -30,7 +30,7 @@ test:
   source_files:
     - tests
   commands:
-    - python -m pytest tests
+    - pytest tests
 
 about:
   summary: read/write files in KVH format
