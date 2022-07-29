@@ -45,6 +45,8 @@ jobs:
     - uses: pypa/cibuildwheel@v2.8.1
       env:
         CIBW_ARCHS_MACOS: auto universal2
+        CIBW_TEST_REQUIRES: pytest
+        CIBW_TEST_COMMAND: "pytest {project}/tests"
 
     - name: Verify clean directory
       run: git diff --exit-code
