@@ -1,5 +1,5 @@
-Welcome to kvh package documentation
-====================================
+Welcome to ``kvh`` package documentation
+========================================
 
 Contents:
 

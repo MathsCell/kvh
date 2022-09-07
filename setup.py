@@ -5,9 +5,8 @@ from pybind11 import get_cmake_dir
 from pybind11.setup_helpers import Pybind11Extension, build_ext
 from setuptools import setup, find_packages
 
-sys.path.insert(0, "kvh")
-from version import __version__
-
+with open("kvh/version.txt", "r") as fp:
+   __version__=fp.read().strip()
 # The main interface is through Pybind11Extension.
 # * You can add cxx_std=11/14/17, and then build_ext can be removed.
 # * You can set include_pybind11=false to add the include directory yourself,
@@ -35,6 +34,7 @@ setup(
    license="GNU General Public License v2 or later (GPLv2+)",
    long_description="KVH format reader/writer",
    packages=find_packages(),
+   include_package_data = True,
    #package_data={"kvh": ["*.txt"]},
    #py_modules=["kvh"],
    ext_modules=ext_modules,
