@@ -15,8 +15,7 @@ import os
 import sys
 from pathlib import Path
 
-with open(Path("..")/"kvh"/"version.txt", "r") as fp:
-    version=fp.read().strip()
+version=(Path("..")/"kvh"/"version.txt").read_text().strip()
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
@@ -55,7 +54,7 @@ master_doc = "index"
 
 # General information about the project.
 project = "kvh"
-copyright = "2022, INRAE/INSA/CNRS"
+copyright = "2024, INRAE/INSA/CNRS"
 author = "Serguei Sokol"
 
 # The version info for the project you're documenting, acts as replacement for
@@ -72,7 +71,7 @@ release = ".".join(version.split(".")[:2])
 #
 # This is also used if you do content translation via gettext catalogs.
 # Usually you set "language" from the command line for these cases.
-language = None
+language = 'en'
 
 # There are two options for replacing |today|: either, you set today to some
 # non-false value, then it is used:
@@ -300,4 +299,4 @@ texinfo_documents = [
 
 
 # Example configuration for intersphinx: refer to the Python standard library.
-intersphinx_mapping = {"https://docs.python.org/": None}
+intersphinx_mapping = {'python': ('https://docs.python.org/3', None)}

@@ -19,7 +19,3 @@ license = {text='GNU General Public License v2 or later (GPLv2+)'}
 
 [project.urls]
 Repository = 'https://forgemia.inra.fr/mathscell/kvh'
-
-[tool.setuptools.package-data]
-# include VERSION file to a package
-kvh = ["VERSION"]

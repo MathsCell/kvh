@@ -10,7 +10,7 @@ project(
 py = import('python').find_installation(pure: false)
 pybind11_dep = dependency('pybind11')
 
-py.extension_module('kvh.ckvh',
+py.extension_module('ckvh',
     'kvh/ckvh.cpp',
     install: true,
     dependencies : [pybind11_dep],
