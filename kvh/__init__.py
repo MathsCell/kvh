@@ -1,4 +1,3 @@
 __all__ = ["kvh.py"]
 from pathlib import Path
-with open(Path(__file__).parent/"version.txt", "r") as fp:
-    __version__=fp.read().strip()
+__version__=(Path(__file__).parent/"version.txt").read_text().strip()
