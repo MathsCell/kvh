@@ -17,7 +17,7 @@ py.extension_module('ckvh',
 )
 
 py.install_sources(
-    ['kvh/__init__.py', 'kvh/kvh.py', 'kvh/version.txt', './salut.kvh'],
+    ['kvh/__init__.py', 'kvh/kvh.py', 'kvh/version.txt', './salut.kvh', 'LICENSE'],
     pure: false,
     subdir: 'kvh',
 )
