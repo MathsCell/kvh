@@ -1,17 +1,16 @@
 project(
     'kvh',
     'cpp',
-    version: run_command('cat', 'kvh/version.txt', check: true).stdout().strip(),
+    version: configure_file(input: 'kvh/version.txt', output: '-', copy: true),
     default_options: [
         'cpp_std=c++11',
     ],
 )
-
 py = import('python').find_installation(pure: false)
 pybind11_dep = dependency('pybind11')
 
 py.extension_module('ckvh',
-    'kvh/ckvh.cpp',
+    ['kvh/ckvh.cpp', 'kvh/ckvh.h'],
     install: true,
     dependencies : [pybind11_dep],
     subdir: 'kvh'
