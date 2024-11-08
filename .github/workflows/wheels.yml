@@ -45,7 +45,8 @@ jobs:
 
     - uses: pypa/cibuildwheel@v2.21.3
       env:
-        CIBW_ARCHS_MACOS: auto
+        CIBW_ARCHS: auto64
+        #CIBW_ARCHS_MACOS: auto
         CIBW_TEST_SKIP: "cp38-macosx_*:arm64"
         CIBW_TEST_REQUIRES: pytest
         CIBW_TEST_COMMAND: "pytest {project}/tests"
