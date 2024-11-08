@@ -1,21 +1,29 @@
 [build-system]
 requires = [
-    "meson-python", "pybind11"
+    "meson", "meson-python", "pybind11", "ninja"
 ]
 build-backend = "mesonpy"
 
-[tool.cibuildwheel]
-test-command = "pytest {project}/tests"
-test-skip = "*universal2:arm64"
-
 [project]
+requires-python = ">=3.8"
 name = "kvh"
 dynamic = ["version"]
 authors = [{name = "Serguei Sokol", email = "sokol@insa-toulouse.fr"}]
 description = "KVH format reader/writer"
-requires-python = ">=3.8"
 keywords = ['key-value hierarchy']
 license = {text='GNU General Public License v2 or later (GPLv2+)'}
 
 [project.urls]
 Repository = 'https://forgemia.inra.fr/mathscell/kvh'
+
+[tool.cibuildwheel]
+build = "*"
+free-threaded-support = false
+
+build-frontend = "build"
+build-verbosity = 1
+
+test-command = "pytest {project}/tests"
+test-requires = [
+  "pytest"
+]
