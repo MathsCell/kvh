@@ -10,6 +10,9 @@ on:
     types:
       - published
 
+permissions:
+  actions: write # required permission to delete artifact
+
 jobs:
   build_sdist:
     name: Build SDist
@@ -59,7 +62,18 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         path: wheelhouse/*.whl
-
+        name: artifact-${{matrix.os}}
+    - name: Delete Artifact
+      uses: actions/github-script@v7
+      env:
+        ART_ID: ${{ steps.artifact-upload.outputs.artifact-id }}
+      with:
+        script: |
+          github.rest.actions.deleteArtifact({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            artifact_id: ${process.env.ART_ID}
+          });
 
   upload_all:
     name: Upload if release
@@ -72,7 +86,7 @@ jobs:
 
     - uses: actions/download-artifact@v4
       with:
-        name: artifact
+        name: artifact-${{matrix.os}}
         path: dist
 
     - uses: pypa/gh-action-pypi-publish@v1.12.2
