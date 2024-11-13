@@ -12,6 +12,7 @@ authors = [{name = "Serguei Sokol", email = "sokol@insa-toulouse.fr"}]
 description = "KVH format reader/writer"
 keywords = ['key-value hierarchy']
 license = {text='GNU General Public License v2 or later (GPLv2+)'}
+readme = "README.md"
 
 [project.urls]
 Repository = 'https://forgemia.inra.fr/mathscell/kvh'
