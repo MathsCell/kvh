@@ -9,10 +9,6 @@ on:
   release:
     types:
       - published
-
-permissions:
-  actions: write # required permission to delete artifact
-
 jobs:
   build_sdist:
     name: Build SDist
@@ -29,6 +25,7 @@ jobs:
     - uses: actions/upload-artifact@v4
       with:
         path: dist/*.tar.gz
+        name: cibw-sdist
 
 
   build_wheels:
@@ -61,35 +58,24 @@ jobs:
     - name: Upload wheels
       uses: actions/upload-artifact@v4
       with:
-        path: wheelhouse/*.whl
-        name: artifact-${{matrix.os}}
-    - name: Delete Artifact
-      uses: actions/github-script@v7
-      env:
-        ART_ID: ${{ steps.artifact-upload.outputs.artifact-id }}
-      with:
-        script: |
-          github.rest.actions.deleteArtifact({
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            artifact_id: ${process.env.ART_ID}
-          });
+        path: ./wheelhouse/*.whl
+        name: cibw-wheels-${{ matrix.os }}-${{ strategy.job-index }}
 
   upload_all:
     name: Upload if release
     needs: [build_wheels, build_sdist]
     runs-on: ubuntu-latest
+    environment: pypi
+    permissions:
+      id-token: write
     if: github.event_name == 'push'
 
     steps:
-    - uses: actions/setup-python@v5
-
     - uses: actions/download-artifact@v4
+      # unpacks all CIBW artifacts into dist/
       with:
-        name: artifact-${{matrix.os}}
+        pattern: cibw-*
         path: dist
+        merge-multiple: true
 
-    - uses: pypa/gh-action-pypi-publish@v1.12.2
-      with:
-        user: __token__
-        password: ${{ secrets.pypi_password }}
+    - uses: pypa/gh-action-pypi-publish@release/v1
