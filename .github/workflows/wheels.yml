@@ -46,10 +46,13 @@ jobs:
     - uses: pypa/cibuildwheel@v2.21.3
       env:
         CIBW_ARCHS: auto64
+        CIBW_ARCHS_WINDOWS: AMD64
         #CIBW_ARCHS_MACOS: auto
-        CIBW_TEST_SKIP: cp38-macosx_*:arm64 *-win_*
+        CIBW_TEST_SKIP: cp38-macosx_*:arm64
         CIBW_TEST_REQUIRES: pytest
         CIBW_TEST_COMMAND: "pytest {project}/tests"
+        CIBW_BEFORE_BUILD_WINDOWS: "pip install delvewheel"
+        CIBW_REPAIR_WHEEL_COMMAND_WINDOWS: "delvewheel repair -w {dest_dir} {wheel}"
 
     - name: Verify clean directory
       run: git diff --exit-code
