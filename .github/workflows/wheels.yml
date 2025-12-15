@@ -74,7 +74,7 @@ jobs:
     if: github.event_name == 'push'
 
     steps:
-    - uses: actions/download-artifact@v6
+    - uses: actions/download-artifact@v7
       # unpacks all CIBW artifacts into dist/
       with:
         pattern: cibw-*
