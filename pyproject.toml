@@ -7,7 +7,7 @@ build-backend = "mesonpy"
 [project]
 requires-python = ">=3.8"
 name = "kvh"
-dynamic = ["version"]
+dynamic = ["version", "dependencies", "scripts", "urls" "classifiers"]
 authors = [{name = "Serguei Sokol", email = "sokol@insa-toulouse.fr"}]
 description = "KVH format reader/writer"
 keywords = ['key-value hierarchy']
@@ -19,7 +19,7 @@ Repository = 'https://forgemia.inra.fr/mathscell/kvh'
 
 [tool.cibuildwheel]
 build = "*"
-free-threaded-support = false
+enable = ["cpython-freethreading"]
 
 build-frontend = "build"
 build-verbosity = 1
