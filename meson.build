@@ -1,7 +1,11 @@
 project(
     'kvh',
     'cpp',
-    version: configure_file(input: 'kvh/version.txt', output: '-', copy: true),
+    version: run_command(
+        'cat',
+        'kvh/version.txt',
+        check: true,
+    ).stdout().strip(),
     default_options: [
         'cpp_std=c++11',
     ],
