@@ -7,7 +7,7 @@ build-backend = "mesonpy"
 [project]
 requires-python = ">=3.8"
 name = "kvh"
-dynamic = ["version", "dependencies", "scripts", "urls" "classifiers"]
+dynamic = ["version", "dependencies", "scripts", "urls", "classifiers"]
 authors = [{name = "Serguei Sokol", email = "sokol@insa-toulouse.fr"}]
 description = "KVH format reader/writer"
 keywords = ['key-value hierarchy']
