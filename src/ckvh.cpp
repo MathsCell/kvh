@@ -302,8 +302,8 @@ list_line kvh_read(std::ifstream& fin, size_t lev, size_t* ln, const std::string
 //'   comment string is done.
 //' @param strip_white logical optional control of white spaces on both ends of keys and values (default FALSE)
 //' @param skip_blank logical optional control of lines composed of only white characters after a possible stripping of a comment (default FALSE)
-//' @param split_str character optional string by which a value string can be splitted in several strings (default: empty string, i.e. no splitting)
-//' @param follow_url logical optional control of recursive kvh reading and parsing. If set to TRUE and a value starts with 'file://' then the path following this prefix will be passed as argument 'fn' to another 'kvh_read()' call. The list returned by this last call will be affected to the corresponding key instead of the value 'file://...'. If a circular reference to some file is detected, a warning is emmited and the faulty value 'file://...' will be left without change. The rest of the file is proceeded as usual. If a path is relative one (i.e. not strating with `/` neither 'C:/' or alike on windows paltform) then its meant relative to the location of the parent kvh file, not the current working directory.
+//' @param split_str character optional string by which a value string can be split in several strings (default: empty string, i.e. no splitting)
+//' @param follow_url logical optional control of recursive kvh reading and parsing. If set to TRUE and a value starts with 'file://' then the path following this prefix will be passed as argument 'fn' to another 'kvh_read()' call. The list returned by this last call will be affected to the corresponding key instead of the value 'file://...'. If a circular reference to some file is detected, a warning is emitted and the faulty value 'file://...' will be left without change. The rest of the file is proceeded as usual. If a path is relative one (i.e. not starting with `/` neither 'C:/' or alike on windows platform) then its meant relative to the location of the parent kvh file, not the current working directory.
 //' @export
 py::object kvh_read(std::string fn, const std::string& comment_str="", const bool strip_white=false, const bool skip_blank=false, const std::string& split_str="", const bool follow_url=false) {
     if (fn.size() == 0)
@@ -324,7 +324,7 @@ py::object kvh_read(std::string fn, const std::string& comment_str="", const boo
         npath=norm_p(fn);
         if (read_files.count(npath)) {
             char buf[1024];
-            std::snprintf(buf, 1024, "kvh_read: detected circular reference to file '%s' via '%s'", npath.c_str(), fn.c_str());
+            std::snprintf(buf, 1024, "kvh_read: detected circular reference to file '%s' via '%s'. This time the file is ignored.", npath.c_str(), fn.c_str());
             std::cerr << buf << std::endl;
             return py::none();
         }
@@ -337,8 +337,8 @@ py::object kvh_read(std::string fn, const std::string& comment_str="", const boo
     fin.open(fn.c_str(), std::ios_base::binary);
     if (!fin.good()) {
         if (follow_url) {
-            read_files.erase(npath);
-            dirw.pop_back();
+            read_files.clear();
+            dirw.clear();
             char buf[1024];
             std::snprintf(buf, 1024, "kvh_read: cannot open file '%s', reason: %s", fn.c_str(), std::strerror(errno));
             throw std::runtime_error(buf);
