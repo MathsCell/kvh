@@ -2,8 +2,9 @@ project(
     'kvh',
     'cpp',
     version: run_command(
-        'cat',
-        'kvh/version.txt',
+        'python',
+        '-c',
+        'print(open("kvh/version.txt").read().strip())',
         check: true,
     ).stdout().strip(),
     default_options: [
