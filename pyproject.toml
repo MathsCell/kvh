@@ -19,7 +19,6 @@ readme = "README.md"
 Repository = 'https://forgemia.inra.fr/mathscell/kvh'
 
 [tool.cibuildwheel]
-before-build-windows = "set PATH=%PATH%;C:\\Program Files\\Git\\usr\\bin"
 build = "*"
 
 build-frontend = "build"
