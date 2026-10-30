@@ -47,7 +47,7 @@ jobs:
         CIBW_ARCHS: auto64
         CIBW_ARCHS_WINDOWS: AMD64
         #CIBW_ARCHS_MACOS: auto
-        CIBW_TEST_SKIP: cp38-macosx_*:arm64
+        #CIBW_TEST_SKIP: cp38-macosx_*:arm64
         CIBW_TEST_REQUIRES: pytest
         CIBW_TEST_COMMAND: "pytest {project}/tests"
         CIBW_BEFORE_BUILD_WINDOWS: "pip install delvewheel"
@@ -70,7 +70,7 @@ jobs:
     environment: pypi
     permissions:
       id-token: write
-    if: github.event_name == 'push'
+    if: github.event_name == 'release'
 
     steps:
     - uses: actions/download-artifact@v8
